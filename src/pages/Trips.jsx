@@ -12,11 +12,12 @@ function Trips() {
   const [loading, setLoading] = useState(true);
 
   const token = localStorage.getItem("token");
+  const baseURL = import.meta.env.VITE_API_BASE_URL;
 
   const fetchTrips = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:5000/api/trips", {
+      const res = await axios.get(`${baseURL}/api/trips`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -61,8 +62,8 @@ function Trips() {
     e.preventDefault();
     try {
       const url = editingTrip
-        ? `http://localhost:5000/api/trips/${editingTrip}`
-        : "http://localhost:5000/api/trips";
+        ? `${baseURL}/api/trips/${editingTrip}`
+        : `${baseURL}/api/trips`;
 
       const method = editingTrip ? "put" : "post";
 
@@ -94,7 +95,7 @@ function Trips() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/trips/${id}`, {
+      await axios.delete(`${baseURL}/api/trips/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchTrips();
@@ -206,7 +207,6 @@ function Trips() {
                 </p>
               )}
 
-              {/* Google Map Embed */}
               {trip.destination && (
                 <div className="mt-4">
                   <iframe
