@@ -7,7 +7,7 @@ function Register() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [phase, setPhase] = useState(""); // "", "registering", "redirecting"
   const navigate = useNavigate();
 
   const baseURL = import.meta.env.VITE_API_BASE_URL;
@@ -16,28 +16,27 @@ function Register() {
     e.preventDefault();
     setError("");
     setSuccess("");
-    setLoading(false);
+    setPhase("registering");
 
     try {
-      await axios.post(`${baseURL}/api/auth/register`, {
-        email,
-        password,
-      });
+      await axios.post(`${baseURL}/api/auth/register`, { email, password });
 
       setSuccess("Registration successful!");
       setEmail("");
       setPassword("");
-      setLoading(true);
 
-      // Redirect after 2 seconds while showing spinner
       setTimeout(() => {
-        navigate("/login");
+        setPhase("redirecting");
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000);
       }, 2000);
     } catch (err) {
       console.error("Registration error:", err.response?.data || err.message);
       setError(
         err.response?.data?.message || "Registration failed. Try again."
       );
+      setPhase("");
     }
   };
 
@@ -48,37 +47,45 @@ function Register() {
       </h2>
 
       {error && <p className="text-red-500 mb-3">{error}</p>}
-      {success && !loading && <p className="text-green-600 mb-3">{success}</p>}
-      {loading && (
-        <div className="flex justify-center items-center py-4">
-          <div className="loader border-4 border-blue-600 border-t-transparent rounded-full w-8 h-8 animate-spin"></div>
+      {success && <p className="text-green-600 mb-3">{success}</p>}
+
+      {(phase === "registering" || phase === "redirecting") && (
+        <div className="flex flex-col items-center py-4 animate-bounce">
+          <span className="text-4xl">🛫</span>
+          <p className="text-gray-600 mt-2">
+            {phase === "registering"
+              ? "Registering... Please wait"
+              : "Taking off to login..."}
+          </p>
         </div>
       )}
 
-      <form onSubmit={handleRegister} className="space-y-4">
-        <input
-          type="email"
-          placeholder="Email"
-          className="w-full border border-gray-300 rounded px-3 py-2"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full border border-gray-300 rounded px-3 py-2"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
-        >
-          Register
-        </button>
-      </form>
+      {phase === "" && (
+        <form onSubmit={handleRegister} className="space-y-4">
+          <input
+            type="email"
+            placeholder="Email"
+            className="w-full border border-gray-300 rounded px-3 py-2"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            className="w-full border border-gray-300 rounded px-3 py-2"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+          >
+            Register
+          </button>
+        </form>
+      )}
     </div>
   );
 }
