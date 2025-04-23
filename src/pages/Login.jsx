@@ -12,15 +12,24 @@ function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError("");
+
     try {
-      const res = await axios.post(`${baseURL}/api/auth/register`, {
+      const res = await axios.post(`${baseURL}/api/auth/login`, {
         email,
         password,
       });
+
+      // Save token to local storage
       localStorage.setItem("token", res.data.token);
+
+      // Redirect to trips page
       navigate("/trips");
     } catch (err) {
-      setError("Login failed. Check your credentials.");
+      console.error("Login error:", err.response?.data || err.message);
+      setError(
+        err.response?.data?.message || "Login failed. Check your credentials."
+      );
     }
   };
 
